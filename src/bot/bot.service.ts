@@ -19,7 +19,7 @@ export class BotService implements OnModuleInit {
     private readonly productService: ProductService,
   ) {}
 
-  // ─── Module ishga tushganda bot polling boshlash ──────────────────────────────
+ 
   onModuleInit() {
     const token = process.env.TELEGRAM_BOT_TOKEN;
     if (!token) {
@@ -32,26 +32,23 @@ export class BotService implements OnModuleInit {
     this.registerHandlers();
   }
 
-  // ─── Barcha event handlerlarni bog'lash ──────────────────────────────────────
+
   private registerHandlers() {
-    // /start komandasi
+   
     this.bot.onText(/\/start/, (msg) => this.handleStart(msg));
 
-    // Barcha oddiy xabarlar
+    
     this.bot.on('message', (msg) => this.handleMessage(msg));
 
-    // Inline button bosilganda
+    
     this.bot.on('callback_query', (query) => this.handleCallbackQuery(query));
 
-    // Xato bo'lganda log qilish
+  
     this.bot.on('polling_error', (error) => {
       this.logger.error(`Polling xatosi: ${error.message}`);
     });
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 1. /START HANDLER
-  // ─────────────────────────────────────────────────────────────────────────────
   private async handleStart(msg: TelegramBot.Message) {
     const chatId = msg.chat.id;
     const telegramId = msg.from?.id;
@@ -60,7 +57,7 @@ export class BotService implements OnModuleInit {
     let user = await this.userModel.findOne({ telegramId });
 
     if (!user) {
-      // Yangi foydalanuvchi - yaratamiz
+   
       user = await this.userModel.create({
         telegramId,
         step: UserStep.WAITING_NAME,
@@ -70,19 +67,17 @@ export class BotService implements OnModuleInit {
     }
 
     if (user.isRegistered) {
-      // Allaqachon ro'yxatdan o'tgan
+     
       return this.showMainMenu(chatId, user.name);
     }
 
-    // Ro'yxatdan o'tmagan, stepni reset qilib qaytadan boshlash
+  
     user.step = UserStep.WAITING_NAME;
     await user.save();
     return this.askName(chatId);
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 2. BARCHA XABARLARNI QAYTA ISHLASH
-  // ─────────────────────────────────────────────────────────────────────────────
+
   private async handleMessage(msg: TelegramBot.Message) {
     const chatId = msg.chat.id;
     const telegramId = msg.from?.id;
@@ -96,20 +91,18 @@ export class BotService implements OnModuleInit {
       return this.bot.sendMessage(chatId, '⚠️ Iltimos, /start bosing');
     }
 
-    // Ro'yxatdan o'tmagan → registration flow
+   
     if (!user.isRegistered) {
       return this.handleRegistrationFlow(msg, user, chatId);
     }
 
-    // Ro'yxatdan o'tgan → asosiy menu navigatsiyasi
+   
     if (msg.text) {
       return this.handleMenuNavigation(msg.text, chatId, telegramId);
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 3. REGISTRATION FLOW (step-by-step)
-  // ─────────────────────────────────────────────────────────────────────────────
+
   private async handleRegistrationFlow(
     msg: TelegramBot.Message,
     user: UserDocument,
@@ -117,7 +110,7 @@ export class BotService implements OnModuleInit {
   ) {
     switch (user.step) {
 
-      // QADAM 1: ISM qabul qilish
+    
       case UserStep.WAITING_NAME: {
         if (!msg.text || msg.text.trim().length < 2) {
           return this.bot.sendMessage(
@@ -146,7 +139,7 @@ export class BotService implements OnModuleInit {
         );
       }
 
-      // QADAM 2: TELEFON qabul qilish
+     
       case UserStep.WAITING_PHONE: {
         if (!msg.contact) {
           return this.bot.sendMessage(
@@ -184,7 +177,7 @@ export class BotService implements OnModuleInit {
         );
       }
 
-      // QADAM 3: LOCATION qabul qilish
+     
       case UserStep.WAITING_LOCATION: {
         if (!msg.location) {
           return this.bot.sendMessage(
@@ -225,9 +218,7 @@ export class BotService implements OnModuleInit {
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 4. MENU NAVIGATSIYASI
-  // ─────────────────────────────────────────────────────────────────────────────
+  
   private async handleMenuNavigation(
     text: string,
     chatId: number,
@@ -249,9 +240,6 @@ export class BotService implements OnModuleInit {
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // 5. CALLBACK QUERY HANDLER (inline buttonlar)
-  // ─────────────────────────────────────────────────────────────────────────────
   private async handleCallbackQuery(query: TelegramBot.CallbackQuery) {
     const chatId = query.message?.chat.id;
     const telegramId = query.from.id;
@@ -281,11 +269,7 @@ export class BotService implements OnModuleInit {
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // HELPER METHODS
-  // ─────────────────────────────────────────────────────────────────────────────
 
-  // ISM so'rash
   private async askName(chatId: number) {
     return this.bot.sendMessage(
       chatId,
@@ -530,7 +514,7 @@ export class BotService implements OnModuleInit {
     );
   }
 
-  // Savatchani tozalash
+
   private async clearCart(chatId: number, telegramId: number) {
     await this.orderModel.findOneAndUpdate(
       { telegramId, status: 'pending' },
