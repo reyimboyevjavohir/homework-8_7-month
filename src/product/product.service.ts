@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Product, ProductDocument, ProductCategory } from './product.schema';
 
-// ─── Static mahsulotlar ───────────────────────────────────────────────────────
+
 const STATIC_PRODUCTS = [
-  // 🥤 Ichimliklar
+
   {
     name: 'Cola',
     price: 10000,
@@ -35,7 +35,7 @@ const STATIC_PRODUCTS = [
     imageUrl: 'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400',
   },
 
-  // 🍔 Yeguliklar
+  
   {
     name: 'Burger',
     price: 25000,
@@ -65,7 +65,7 @@ const STATIC_PRODUCTS = [
     imageUrl: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=400',
   },
 
-  // 🍰 Shirinliklar
+
   {
     name: 'Tort',
     price: 30000,
@@ -97,7 +97,7 @@ export class ProductService implements OnModuleInit {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
   ) {}
 
-  // App ishga tushganda static mahsulotlarni seed qilish
+  
   async onModuleInit() {
     const count = await this.productModel.countDocuments();
     if (count === 0) {
